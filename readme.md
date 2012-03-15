@@ -6,7 +6,6 @@ Like pagination in Django, django-sortable works on a variety of data-types. Whe
 
 
 ##Installation
---------------
 
 1.  Add django-sortable to the `INSTALLED_APPS` setting in your project's settings.py file:
 
@@ -38,7 +37,6 @@ Like pagination in Django, django-sortable works on a variety of data-types. Whe
 
 
 ##Basic Usage
--------------
 
 The most basic way to use django-sortable is to pass a QuerySet to the sortable helper, and add some simple template tags. Here's an example view and template:
 
@@ -74,7 +72,6 @@ __books.html__
 
 
 ##Advanced Usage
-----------------
 
 If you need more control over the behavior of django-sortable, you can use the Sortable class directly. Here's how you'd do it:
 
@@ -116,7 +113,6 @@ __authors.html__
 
 
 ##Raw SQL Usage
----------------
 
 You can use django-sortable with raw queries by asking for just ordering columns. This way you can build the query yourself and append an ORDER BY clause. Here's an example:
 
@@ -179,7 +175,6 @@ __books.html__
 
 
 ##Additional Options
---------------------
 
 ####Defining Ordering Fields
 
