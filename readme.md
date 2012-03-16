@@ -13,15 +13,8 @@ Like pagination in Django, django-sortable works on a variety of data-types. Whe
     		# …
     		'django_sortable',
     	)
-	
-2.  Add the sortable middleware to the `MIDDLEWARE_CLASSES` setting as well. Ordering for this class doesn't matter:
-	
-		MIDDLEWARE_CLASSES = (
-			# …
-			'django_sortable.middleware.SortableMiddleware',
-		)
 
-3.  Add the request context processor to the `TEMPLATE_CONTEXT_PROCESSORS` setting. If you don't have these defined in your settings.py file, you'll have to specify the default ones, and add the request processor at the end. (The current defaults are listed in the Django [context processor documentation](https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATE_CONTEXT_PROCESSORS).) This setting will look something like this:
+2.  Add the request context processor to the `TEMPLATE_CONTEXT_PROCESSORS` setting. If you don't have these defined in your settings.py file, you'll have to specify the default ones, and add the request processor at the end. (The current defaults are listed in the Django [context processor documentation](https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATE_CONTEXT_PROCESSORS).) This setting will look something like this:
 
 		TEMPLATE_CONTEXT_PROCESSORS = (
 		    'django.contrib.auth.context_processors.auth',
