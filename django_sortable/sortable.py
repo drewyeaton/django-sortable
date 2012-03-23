@@ -43,7 +43,7 @@ class Sortable(object):
       result = (self.objects
         .order_by((direction == 'desc' and '-' or '') + field)
       )
-    elif isinstance(self.objects, list):
+    elif isinstance(self.objects, (list, tuple)):
       if len(self.objects) < 2:
         return self.objects
       
