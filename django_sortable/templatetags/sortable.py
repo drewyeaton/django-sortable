@@ -82,6 +82,22 @@ class SortableTableHeaderNode(SortableLinkNode):
     return '<th class="%s"><a href="%s" title="%s">%s</a></th>' % (css_class, url, self.title, self.title)
 
 
+class SortableURLNode(SortableLinkNode):
+  """Build sortable link header based on query params."""
+  
+  def render(self, context):
+    url, css_class = self.build_link(context)
+    return url
+
+
+class SortableClassNode(SortableLinkNode):
+  """Build sortable link header based on query params."""
+  
+  def render(self, context):
+    url, css_class = self.build_link(context)
+    return css_class
+
+
 def sortable_link(parser, token):
   field, title = parse_tag_token(token)
   return SortableLinkNode(field, title)
@@ -90,6 +106,20 @@ def sortable_link(parser, token):
 def sortable_header(parser, token):
   field, title = parse_tag_token(token)
   return SortableTableHeaderNode(field, title)
+
+
+def sortable_url(parser, token):
+  field, title = parse_tag_token(token)
+  return SortableURLNode(field, title)
+
+
+def sortable_class(parser, token):
+  field, title = parse_tag_token(token)
+  return SortableClassNode(field, title)
+
   
 sortable_link = register.tag(sortable_link)
 sortable_header = register.tag(sortable_header)
+sortable_url = register.tag(sortable_url)
+sortable_class = register.tag(sortable_class)
+
