@@ -74,7 +74,7 @@ __views.py__
 	
 	def authors(request):
 		
-		# we can pass in a list of dictionaries too!
+		# we can pass in a list (or tuple) of dictionaries too!
 		author_list = Author.objects.values()
 		
 		sortable = Sortable(author_list, (('author', 'full_name'), 'birth_date'))
@@ -211,3 +211,25 @@ Depending on the direction of the sort, a class will be placed on each header or
 	SORT_DESC_CLASS = 'sort-desc'
 	SORT_NONE_CLASS = 'sort-none'
 
+
+####Building Arbitrary Sort Links
+
+If your template code is really gnarly, you can build your own sorting links using some special template tags. This method isn't recommended as a common practice, but you can use this feature to handle special cases.
+
+Say you want to have a column header link with this markup:
+
+	<th colspan="2" class="my-header sort-asc">
+		<a href="/" title="Book">
+    	<span class="book-icon">Book</span>
+    </a>
+	</th>
+
+Obviously neither the `sortable_header` or `sortable_link` tags will work here, but we can build this by hand using the `sortable_class` and `sortable_url` tags.  
+
+	<th colspan="2" class="my-header {% sortable_class book %}">
+		<a href="{% sortable_url book %}" title="Book">
+    	<span class="book-icon">Book</span>
+    </a>
+	</th>
+
+There is a slight maintenance burden here because you'll have to remember to change both the `sortable_class` and `sortable_url` tags if you want to adjust the sort column.
