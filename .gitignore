@@ -1,6 +1,7 @@
 *.pyc
 *.DS_Store
 *.egg-info
+dist/*
 bin/*
 include/*
 lib/*
