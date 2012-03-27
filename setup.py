@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 LONG_DESCRIPTION = '''A flexible way to handle sorting within a complex Django application.'''
 
@@ -25,7 +25,7 @@ setup(name='django-sortable',
     author='Drew Yeaton',
     author_email='xeeton@gmail.com',
     url='http://github.com/drewyeaton/django-sortable',
-    packages=['django_sortable'],    
+    packages=find_packages(),    
     platforms=['Platform Independent'],
     license='GPLv3',
     classifiers=CLASSIFIERS,
