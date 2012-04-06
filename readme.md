@@ -77,7 +77,11 @@ __views.py__
 		# we can pass in a list (or tuple) of dictionaries too!
 		author_list = Author.objects.values()
 		
-		sortable = Sortable(author_list, (('author', 'full_name'), 'birth_date'))
+		# the 'author' field actually sorts on last_name then first_name
+		sortable = Sortable(author_list, (
+			('author', ('last_name', 'first_name')), 
+			'birth_date'
+		))
 		field_name = request.GET.get('sort', '')
 		direction = request.GET.get('dir', 'asc')
 		authors = sortable.sorted(field_name, direction)
@@ -184,6 +188,75 @@ Notice that we have a tuple for the fields argument, and one of the items in the
 Defining ordering fields has the secondary benefit of locking down which fields are sorted on.
 
 
+####Sorting on Multiple Database Columns
+
+If you need more control with exactly how sorting happens, you can specify more than one column to sort by. This works with either Query Sets, lists/tuples of dictionaries or lists/tuples of objects.
+
+Lets assume you want to sort by a book's popularity, but you want to make sure that if two or more books have the same popularity, they are then _always_ sorted by title alphabetically ascending.
+
+	books = sortable_helper(
+		request=request, 
+		objects=book_list, 
+		fields=(
+			'title', 
+			('popularity', ('popularity', '++title'))
+		)
+	)
+
+Note how the 'popularity' field is specifying two sort columns, and the second column is prepended with a '++'. We've added some syntax for always sorting in a particular direction no matter what the direction is passed to Sortable. Here's a rundown of how that works:
+
+<table style="border: 1px #eee solid; border-collapse: collapse; border-spacing: 0;">
+	<thead>
+		<tr style="border-bottom: 1px #eee solid; background-color: #f6f6f6">
+			<th style="padding: 10px;">Syntax</th>
+			<th style="padding: 10px;">Direction</th>
+			<th style="padding: 10px;">Sort</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td rowspan="2" style="padding: 10px;"><code>column_name</code> or <code>+column_name</code></td>
+			<td style="border-bottom: 1px #eee solid; padding: 10px;"><code>asc</code></td>
+			<td style="border-bottom: 1px #eee solid; padding: 10px;">Will sort column_name <b>ascending</b>.</td>
+		</tr>
+		<tr style="border-bottom: 1px #eee solid;">
+			<td style="padding: 10px;"><code>desc</code></td>
+			<td style="padding: 10px;">Will sort column_name <b>descending</b>.</td>
+		</tr>
+		<tr>
+			<td rowspan="2" style="padding: 10px;"><code>-column_name</code></td>
+			<td style="border-bottom: 1px #eee solid; padding: 10px;"><code>asc</code></td>
+			<td style="border-bottom: 1px #eee solid; padding: 10px;">Will sort column_name <b>descending</b>.</td>
+		</tr>
+		<tr style="border-bottom: 1px #eee solid;">
+			<td style="padding: 10px;"><code>desc</code></td>
+			<td style="padding: 10px;">Will sort column_name <b>ascending</b>.</td>
+		</tr>
+		<tr style="border-bottom: 1px #eee solid;">
+			<td style="padding: 10px;"><code>++column_name</code></td>
+			<td style="padding: 10px;"><code>asc</code> or <code>desc</code></td>
+			<td style="padding: 10px;">Will <b>always</b> sort column_name <b>ascending</b>.</td>
+		</tr>
+		<tr>
+			<td style="padding: 10px;"><code>--column_name</code></td>
+			<td style="padding: 10px;"><code>asc</code> or <code>desc</code></td>
+			<td style="padding: 10px;">Will <b>always</b> sort column_name <b>descending</b>.</td>
+		</tr>
+	</tbody>
+</table><br>
+
+Note that the `column_name` and `+column_name` are identical. The latter was added to provide some consistancy.
+
+
+####Setting Custom Classes
+
+Depending on the direction of the sort, a class will be placed on each header or link. The default classes are `sort-asc`, `sort-desc`, and `sort-none`. However, these are fully customizable using your project's settings. In your settings.py file, set these variables:
+
+	SORT_ASC_CLASS = 'sort-asc'
+	SORT_DESC_CLASS = 'sort-desc'
+	SORT_NONE_CLASS = 'sort-none'
+
+
 ####Rendering Links
 
 If you want to specify a title in the header or link, you can place it in the `sortable_header` itself. Do it like this:
@@ -201,15 +274,6 @@ You may want to do this to obscure your field names, but most commonly you proba
 This tag will generate a link with a class on the anchor instead of the table header:
 
 	<a class="sort-asc" href="/books/?sort=page_count&dir=asc" title="Number of Pages">Number of Pages</a>
-
-
-####Setting Custom Classes
-
-Depending on the direction of the sort, a class will be placed on each header or link. The default classes are `sort-asc`, `sort-desc`, and `sort-none`. However, these are fully customizable using your project's settings. In your settings.py file, set these variables:
-
-	SORT_ASC_CLASS = 'sort-asc'
-	SORT_DESC_CLASS = 'sort-desc'
-	SORT_NONE_CLASS = 'sort-none'
 
 
 ####Building Arbitrary Sort Links
