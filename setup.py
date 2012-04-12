@@ -19,7 +19,7 @@ CLASSIFIERS = [
 KEYWORDS = 'sorting sortable queryset pagination django'
 
 setup(name='django-sortable',
-    version='0.2.0',
+    version='0.2.1',
     description='Flexible sorting for Django applications',
     long_description=LONG_DESCRIPTION,
     author='Drew Yeaton',

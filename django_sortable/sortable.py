@@ -52,12 +52,8 @@ class Sortable(object):
       if len(self.objects) < 2:
         return self.objects
       
-      if isinstance(self.objects[0], dict):
-        getter = itemgetter(field)
-      else:
-        getter = attrgetter(field)
-      
       comparers = []
+      getter = itemgetter if isinstance(self.objects[0], dict) else attrgetter
       for f in fields:
         field = f[1:] if f.startswith('-') else f
         comparers.append((getter(field), 1 if field == f else -1))
