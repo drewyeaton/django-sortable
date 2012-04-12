@@ -183,6 +183,17 @@ footer {
   bottom:50px;
 }
 
+.version {
+  color: #fff;
+  font-size: .8em;
+  padding: 0 .25em;
+  margin-left: .15em;
+  border-radius: 4px; 
+  -moz-border-radius: 4px; 
+  -webkit-border-radius: 4px; 
+  background-color: #999;
+}
+
 @media print, screen and (max-width: 960px) {
   
   div.wrapper {

@@ -17,7 +17,7 @@
     <div class="wrapper">
       <header>
         <img src="images/django-sortable.gif" width="284" height="255" alt="Django Sortable">
-        <h1>Django Sortable</h1>
+        <h1>Django Sortable <span class="version">0.2</span></h1>
         <p>A better, more flexible way to handle sorting within a complex Django application.</p>
         <p class="view"><a href="https://github.com/drewyeaton/django-sortable">View the Project on GitHub <small>drewyeaton/django-sortable</small></a></p>
         <ul>
@@ -27,22 +27,21 @@
         </ul>
       </header>
       <section>
-        <p>Like pagination in Django, django-sortable works on a variety of data-types. When possible, an <code>order_by</code> clause will be added to a QuerySet. However, django-sortable can also handle lists of dictionaries or objects. Support is available for raw queries as well.</p>
+      <!-- README SECTION START -->
 
-<h2>Installation</h2>
+<p>Like pagination in Django, django-sortable works on a variety of data-types. When possible, an <code>order_by</code> clause will be added to a QuerySet but django-sortable also handles lists or tuples of dictionaries or objects. Support is also available for building the <code>ORDER BY</code> clause of a SQL query.</p>
+
+<h2 id="installation">Installation</h2>
 
 <ol>
-<li>
-<p>Add django-sortable to the <code>INSTALLED_APPS</code> setting in your project's settings.py file:</p>
+<li><p>Add django-sortable to the <code>INSTALLED_APPS</code> setting in your project&#8217;s settings.py file:</p>
 
 <pre><code>INSTALLED_APPS = (
     # …
     'django_sortable',
 )
-</code></pre>
-</li>
-<li>
-<p>Add the request context processor to the <code>TEMPLATE_CONTEXT_PROCESSORS</code> setting. If you don't have these defined in your settings.py file, you'll have to specify the default ones, and add the request processor at the end. (The current defaults are listed in the Django <a href="https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATE_CONTEXT_PROCESSORS">context processor documentation</a>.) This setting will look something like this:</p>
+</code></pre></li>
+<li><p>Add the request context processor to the <code>TEMPLATE_CONTEXT_PROCESSORS</code> setting. If you don&#8217;t have these defined in your settings.py file, you&#8217;ll have to specify the default ones, and add the request processor at the end. (The current defaults are listed in the Django <a href="https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATE_CONTEXT_PROCESSORS">context processor documentation</a>.) This setting will look something like this:</p>
 
 <pre><code>TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -51,223 +50,303 @@
     'django.core.context_processors.media',
     'django.core.context_processors.static',
     'django.contrib.messages.context_processors.messages',
-
+    
     # this is the additional requirement… 
-    'django.core.context_processors.request', 
+    'django.core.context_processors.request',
 )
-</code></pre>
-</li>
-</ol><h2>Basic Usage</h2>
+</code></pre></li>
+</ol>
 
-<p>The most basic way to use django-sortable is to pass a QuerySet to the sortable helper, and add some simple template tags. Here's an example view and template:</p>
+<h2 id="basic_usage">Basic Usage</h2>
+
+<p>The most basic way to use django-sortable is to pass a QuerySet to the sortable helper and add some simple template tags. Here&#8217;s an example view and template:</p>
 
 <p><strong>views.py</strong></p>
 
-<pre><code>    from django_sortable.helpers import sortable_helper
+<pre><code>from django_sortable.helpers import sortable_helper
 
-    def books(request):
-        book_list = Book.objects.all()
-        books = sortable_helper(request, book_list)
+def books(request):
+    book_list = Book.objects.all()
+    books = sortable_helper(request, book_list)
 
-        # pagination code would go here, after sorting
-        # …
+    # pagination code would go here, after sorting
+    # …
 
-        return render_to_response('books.html', {'books': books})
+    return render_to_response('books.html', {'books': books})
 </code></pre>
 
 <p><strong>books.html</strong></p>
 
-<pre><code>    {% load sortable %}
+<pre><code>{% load sortable %}
 
-    &lt;table&gt;
-        &lt;tr&gt;
-            {% sortable_header title %}
-            {% sortable_header published %}
-        &lt;/tr&gt;
-        {% for book in books %}
-        &lt;tr&gt;
-            &lt;td&gt;{{ book.title }}&lt;/td&gt;
-            &lt;td&gt;{{ book.published }}&lt;/td&gt;
-        &lt;/tr&gt;
-        {% endfor %}
-    &lt;/table&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        {% sortable_header title %}
+        {% sortable_header published %}
+    &lt;/tr&gt;
+    {% for book in books %}
+    &lt;tr&gt;
+        &lt;td&gt;{{ book.title }}&lt;/td&gt;
+        &lt;td&gt;{{ book.published }}&lt;/td&gt;
+    &lt;/tr&gt;
+    {% endfor %}
+&lt;/table&gt;
 </code></pre>
 
-<h2>Advanced Usage</h2>
+<h2 id="advanced_usage">Advanced Usage</h2>
 
-<p>If you need more control over the behavior of django-sortable, you can use the Sortable class directly. Here's how you'd do it:</p>
+<p>If you need more control over the behavior of django-sortable, you can use the Sortable class directly. Here&#8217;s how you&#8217;d do it:</p>
 
 <p><strong>views.py</strong></p>
 
-<pre><code>    from django_sortable.sortable import Sortable
+<pre><code>from django_sortable.sortable import Sortable
 
-    def authors(request):
+def authors(request):
 
-        # we can pass in a list (or tuple) of dictionaries too!
-        author_list = Author.objects.values()
+    # we can pass in a list (or tuple) of dictionaries too!
+    author_list = Author.objects.values()
 
-        sortable = Sortable(author_list, (('author', 'full_name'), 'birth_date'))
-        field_name = request.GET.get('sort', '')
-        direction = request.GET.get('dir', 'asc')
-        authors = sortable.sorted(field_name, direction)
+    # the 'author' field actually sorts on last_name then first_name
+    sortable = Sortable(author_list, (
+        ('author', ('last_name', 'first_name')), 
+        'birth_date'
+    ))
+    field_name = request.GET.get('sort', '')
+    direction = request.GET.get('dir', 'asc')
+    authors = sortable.sorted(field_name, direction)
 
-        # pagination code would go here, after sorting
-        # …
+    # pagination code would go here, after sorting
+    # …
 
-        return render_to_response('authors.html', {'authors': authors})
+    return render_to_response('authors.html', {'authors': authors})
 </code></pre>
 
 <p><strong>authors.html</strong></p>
 
-<pre><code>    {% load sortable %}
+<pre><code>{% load sortable %}
 
-    &lt;table&gt;
-        &lt;tr&gt;
-            &lt;th&gt;{% sortable_link author %}&lt;/th&gt;
-            &lt;th&gt;{% sortable_link birth_date "Birthday" %}&lt;/th&gt;
-        &lt;/tr&gt;
-        {% for author in authors %}
-        &lt;tr&gt;
-            &lt;td&gt;{{ author.full_name }}&lt;/td&gt;
-            &lt;td&gt;{{ author.birth_date }}&lt;/td&gt;
-        &lt;/tr&gt;
-        {% endfor %}
-    &lt;/table&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;{% sortable_link author %}&lt;/th&gt;
+        &lt;th&gt;{% sortable_link birth_date "Birthday" %}&lt;/th&gt;
+    &lt;/tr&gt;
+    {% for author in authors %}
+    &lt;tr&gt;
+        &lt;td&gt;{{ author.full_name }}&lt;/td&gt;
+        &lt;td&gt;{{ author.birth_date }}&lt;/td&gt;
+    &lt;/tr&gt;
+    {% endfor %}
+&lt;/table&gt;
 </code></pre>
 
-<h2>Raw SQL Usage</h2>
+<h2 id="raw_sql_usage">Raw SQL Usage</h2>
 
-<p>You can use django-sortable with raw queries by asking for just ordering columns. This way you can build the query yourself and append an ORDER BY clause. Here's an example:</p>
+<p>You can use django-sortable with raw SQL queries by asking it for ordering columns. This way you can build the query yourself and append an <code>ORDER BY</code> clause. Here&#8217;s an example:</p>
 
 <p><strong>views.py</strong></p>
 
-<pre><code>    from django_sortable.sortable import Sortable
+<pre><code>from django_sortable.sortable import Sortable
 
-    def books(request):
+def books(request):
 
-        # all we need is an ordering column, don't pass an object list
-        sortable = Sortable(None, (('book', 'b.title'),))
-        field_name = request.GET.get('sort', '')
-        direction = request.GET.get('dir', 'asc')
+    # all we need is an ordering column, don't pass an object list
+    sortable = Sortable(None, (('book', 'b.title'),))
+    field_name = request.GET.get('sort', '')
+    direction = request.GET.get('dir', 'asc')
 
-        # also, you can pass in a default ordering column(s)
-        order_col = sortable.sql_column(
-            field_name=field_name, 
-            direction=direction, 
-            default='m.title ASC, p.title ASC, t.condition DESC'
-        )
+    # also, you can pass in a default ordering column(s)
+    order_col = sortable.sql_column(
+        field_name=field_name, 
+        direction=direction, 
+        default='m.title ASC, p.title ASC, t.condition DESC'
+    )
 
-        sql = '''
-            SELECT      
-                b.id AS id,
-                b.title AS title,
-                b.page_count AS num_pages,
-                a.full_name AS author,
-            FROM 
-                book as b, 
-                author as a
-            WHERE 
-                b.page_count &gt; 100 AND
-                b.status = %s AND
-                b.author_id = a.id
-            ORDER BY ''' + order_col
+    sql = '''
+        SELECT      
+            b.id AS id,
+            b.title AS title,
+            b.page_count AS num_pages,
+            a.full_name AS author,
+        FROM 
+            book as b, 
+            author as a
+        WHERE 
+            b.page_count &gt; 100 AND
+            b.status = %s AND
+            b.author_id = a.id
+        ORDER BY ''' + order_col
 
-            cursor = connection.cursor()
-            cursor.execute(sql, ['available',])
-            books = dictfetchall(cursor)
+    cursor = connection.cursor()
+    cursor.execute(sql, ['available',])
+    books = dictfetchall(cursor)
 
-            return render_to_response('books.html', {'books': books})
+    return render_to_response('books.html', {'books': books})
 </code></pre>
 
 <p><strong>books.html</strong></p>
 
-<pre><code>    {% load sortable %}
+<pre><code>{% load sortable %}
 
-    &lt;table&gt;
-        &lt;tr&gt;
-            &lt;th&gt;{% sortable_link book "Book" %}&lt;/th&gt;
-            &lt;th&gt;Author&lt;/th&gt;
-        &lt;/tr&gt;
-        {% for book in books %}
-        &lt;tr&gt;
-            &lt;td&gt;{{ book.title }}&lt;/td&gt;
-            &lt;td&gt;{{ book.author }}&lt;/td&gt;
-        &lt;/tr&gt;
-        {% endfor %}
-    &lt;/table&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;{% sortable_link book "Book" %}&lt;/th&gt;
+        &lt;th&gt;Author&lt;/th&gt;
+    &lt;/tr&gt;
+    {% for book in books %}
+    &lt;tr&gt;
+        &lt;td&gt;{{ book.title }}&lt;/td&gt;
+        &lt;td&gt;{{ book.author }}&lt;/td&gt;
+    &lt;/tr&gt;
+    {% endfor %}
+&lt;/table&gt;
 </code></pre>
 
-<h2>Additional Options</h2>
+<h2 id="additional_options">Additional Options</h2>
 
-<h4>Defining Ordering Fields</h4>
+<h4 id="defining_ordering_fields">Defining Ordering Fields</h4>
 
-<p>Sometimes the column you sort by is complex; especially if it spans relationships. You can specify sortable fields with custom order fields very easily. Imagine that we want to sort by author in our basic books example. We need to specify ordering fields for all the fields we want to order by, and add an additional string for a special ordering field:</p>
+<p>Sometimes the column you sort by is complex—especially if it spans relationships. You can specify sortable fields with custom order fields very easily. Imagine that we want to sort by author in our basic books example. We need to specify ordering fields for all the fields we want to order by, and add an additional string for a special ordering field:</p>
 
-<pre><code>    books = sortable_helper(
-        request=request, 
-        objects=book_list, 
-        fields=('title', 'published', ('author', 'author__fullname'), 'page_count')
-    )
+<pre><code>books = sortable_helper(
+    request=request, 
+    objects=book_list, 
+    fields=('title', 'published', ('author', 'author__fullname'), 'page_count')
+)
 </code></pre>
 
-<p>Notice that we have a tuple for the fields argument, and one of the items in the tuple is another tuple. In this inner tuple, the first item is the <strong>field name</strong> and the second is our special <strong>ordering field</strong>. When we sort on <em>author</em>, we're actually sorting on <em>author__fullname</em>.</p>
+<p>Notice that we have a tuple for the fields argument, and one of the items in the tuple is another tuple. In this inner tuple, the first item is the <strong>field name</strong> and the second is our special <strong>ordering field</strong>. When we sort on <em>author</em>, we&#8217;re actually sorting on <em>author</em><em>fullname</em>.</p>
 
 <p>Defining ordering fields has the secondary benefit of locking down which fields are sorted on.</p>
 
-<h4>Rendering Links</h4>
+<h4 id="specifying_a_default_sort_direction">Specifying a Default Sort Direction</h4>
+
+<p>The default sort direction for all fields is ascending. This is probably fine for textual data, but for numbers it&#8217;s nice to default to largest first. To specify a default sort direction of descending, place a <code>-</code> before the sort column in the sortable header tag. Here&#8217;s an example:</p>
+
+<pre><code>{% sortable_header -page_count "Number of Pages" %}
+</code></pre>
+
+<p>This tag generates a table header (with a default direction of descending) like this:</p>
+
+<pre><code>&lt;th class="sort-none"&gt;&lt;a href="/books/?sort=page_count&amp;dir=desc" title="Number of Pages"&gt;Number of Pages&lt;/a&gt;&lt;/th&gt;
+</code></pre>
+
+<h4 id="sorting_on_multiple_database_columns">Sorting on Multiple Database Columns</h4>
+
+<p>If you need more control with exactly how sorting happens, you can specify more than one column to sort by. This works with either Query Sets, lists/tuples of dictionaries or lists/tuples of objects.</p>
+
+<p>Lets assume you want to sort by a book&#8217;s popularity, but you want to make sure that if two or more books have the same popularity, they are then <em>always</em> sorted by title alphabetically ascending (regardless of the popularity sort direction).</p>
+
+<pre><code>books = sortable_helper(
+    request=request, 
+    objects=book_list, 
+    fields=(
+        'title', 
+        ('popularity', ('popularity', '++title'))
+    )
+)
+</code></pre>
+
+<p>Note how the &#8216;popularity&#8217; field is specifying two sort columns, and the second column is prepended with a &#8216;++&#8217;. We&#8217;ve added some syntax for always sorting in a particular direction no matter what direction is passed to django-sortable. Here&#8217;s a rundown of how that works:</p>
+
+<p><table style="border: 1px #eee solid; border-collapse: collapse; border-spacing: 0;">
+  <thead>
+    <tr style="border-bottom: 1px #eee solid; background-color: #f6f6f6">
+      <th style="padding: 10px;">Syntax</th>
+      <th style="padding: 10px;">Direction</th>
+      <th style="padding: 10px;">Sort</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="2" style="padding: 10px;"><code>column<em>name</code> or <code>+column</em>name</code></td>
+      <td style="border-bottom: 1px #eee solid; padding: 10px;"><code>asc</code></td>
+      <td style="border-bottom: 1px #eee solid; padding: 10px;">Will sort column<em>name <b>ascending</b>.</td>
+    </tr>
+    <tr style="border-bottom: 1px #eee solid;">
+      <td style="padding: 10px;"><code>desc</code></td>
+      <td style="padding: 10px;">Will sort column</em>name <b>descending</b>.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="padding: 10px;"><code>-column<em>name</code></td>
+      <td style="border-bottom: 1px #eee solid; padding: 10px;"><code>asc</code></td>
+      <td style="border-bottom: 1px #eee solid; padding: 10px;">Will sort column</em>name <b>descending</b>.</td>
+    </tr>
+    <tr style="border-bottom: 1px #eee solid;">
+      <td style="padding: 10px;"><code>desc</code></td>
+      <td style="padding: 10px;">Will sort column<em>name <b>ascending</b>.</td>
+    </tr>
+    <tr style="border-bottom: 1px #eee solid;">
+      <td style="padding: 10px;"><code>++column</em>name</code></td>
+      <td style="padding: 10px;"><code>asc</code> or <code>desc</code></td>
+      <td style="padding: 10px;">Will <b>always</b> sort column<em>name <b>ascending</b>.</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><code>--column</em>name</code></td>
+      <td style="padding: 10px;"><code>asc</code> or <code>desc</code></td>
+      <td style="padding: 10px;">Will <b>always</b> sort column_name <b>descending</b>.</td>
+    </tr>
+  </tbody>
+</table><br></p>
+
+<p>Note that the <code>column_name</code> and <code>+column_name</code> are identical. The latter was added for consistency.</p>
+
+<h4 id="setting_custom_classes">Setting Custom Classes</h4>
+
+<p>Depending on the direction of the sort, a class will be placed on each header or link. The default classes are <code>sort-asc</code>, <code>sort-desc</code>, and <code>sort-none</code>. However, these are fully customizable using your project&#8217;s settings. In your settings.py file, set these variables:</p>
+
+<pre><code>SORT_ASC_CLASS = 'sort-asc'
+SORT_DESC_CLASS = 'sort-desc'
+SORT_NONE_CLASS = 'sort-none'
+</code></pre>
+
+<h4 id="rendering_links">Rendering Links</h4>
 
 <p>If you want to specify a title in the header or link, you can place it in the <code>sortable_header</code> itself. Do it like this:</p>
 
-<pre><code>    {% sortable_header page_count "Number of Pages" %}
+<pre><code>{% sortable_header page_count "Number of Pages" %}
 </code></pre>
 
 <p>This tag generates a table header like this:</p>
 
-<pre><code>    &lt;th class="sort-asc"&gt;&lt;a href="/books/?sort=page_count&amp;dir=asc" title="Number of Pages"&gt;Number of Pages&lt;/a&gt;&lt;/th&gt;
+<pre><code>&lt;th class="sort-asc"&gt;&lt;a href="/books/?sort=page_count&amp;dir=asc" title="Number of Pages"&gt;Number of Pages&lt;/a&gt;&lt;/th&gt;
 </code></pre>
 
-<p>You may want to do this to obscure your field names, but most commonly you probably just want to specify some easier-to-read text. If you don't want to use table headers, you can get plain links with the <code>sortable_link</code> tag like this:</p>
+<p>You may want to do this to obscure your database column names, but most commonly you probably just want to make your URLs nicer. If you don&#8217;t want to use table headers, you can get plain links with the <code>sortable_link</code> tag like this:</p>
 
-<pre><code>    {% sortable_link page_count "Number of Pages" %}
+<pre><code>{% sortable_link page_count "Number of Pages" %}
 </code></pre>
 
 <p>This tag will generate a link with a class on the anchor instead of the table header:</p>
 
-<pre><code>    &lt;a class="sort-asc" href="/books/?sort=page_count&amp;dir=asc" title="Number of Pages"&gt;Number of Pages&lt;/a&gt;
+<pre><code>&lt;a class="sort-asc" href="/books/?sort=page_count&amp;dir=asc" title="Number of Pages"&gt;Number of Pages&lt;/a&gt;
 </code></pre>
 
-<h4>Setting Custom Classes</h4>
+<h4 id="building_arbitrary_sort_links">Building Arbitrary Sort Links</h4>
 
-<p>Depending on the direction of the sort, a class will be placed on each header or link. The default classes are <code>sort-asc</code>, <code>sort-desc</code>, and <code>sort-none</code>. However, these are fully customizable using your project's settings. In your settings.py file, set these variables:</p>
-
-<pre><code>    SORT_ASC_CLASS = 'sort-asc'
-    SORT_DESC_CLASS = 'sort-desc'
-    SORT_NONE_CLASS = 'sort-none'
-</code></pre>
-
-<h4>Building Arbitrary Sort Links</h4>
-
-<p>If your template code is really gnarly, you can build your own sorting links using some special template tags. This method isn't recommended as a common practice, but you can use this feature to handle special cases.</p>
+<p>If your template code is really gnarly, you can build your own sorting links using some special template tags. This method isn&#8217;t recommended as common practice, but you can use it in a pinch.</p>
 
 <p>Say you want to have a column header link with this markup:</p>
 
-<pre><code>    &lt;th colspan="2" class="my-header sort-asc"&gt;
-        &lt;a href="/" title="Book"&gt;
-            &lt;span class="book-icon"&gt;Book&lt;/span&gt;
-        &lt;/a&gt;
-    &lt;/th&gt;
+<pre><code>&lt;th colspan="2" class="my-header sort-asc"&gt;
+    &lt;a href="/" title="Book"&gt;
+        &lt;span class="book-icon"&gt;Book&lt;/span&gt;
+    &lt;/a&gt;
+&lt;/th&gt;
 </code></pre>
 
-<p>Obviously neither the <code>sortable_header</code> or <code>sortable_link</code> tags will work here, but we can build this by hand using the <code>sortable_class</code> and <code>sortable_url</code> tags.  </p>
+<p>Obviously neither <code>sortable_header</code> or <code>sortable_link</code> tags will work here, but we can build this by hand using  <code>sortable_class</code> and <code>sortable_url</code> tags.  </p>
 
-<pre><code>    &lt;th colspan="2" class="my-header {% sortable_class book %}"&gt;
-        &lt;a href="{% sortable_url book %}" title="Book"&gt;
-            &lt;span class="book-icon"&gt;Book&lt;/span&gt;
-        &lt;/a&gt;
-    &lt;/th&gt;
+<pre><code>&lt;th colspan="2" class="my-header {% sortable_class book %}"&gt;
+    &lt;a href="{% sortable_url book %}" title="Book"&gt;
+        &lt;span class="book-icon"&gt;Book&lt;/span&gt;
+    &lt;/a&gt;
+&lt;/th&gt;
 </code></pre>
 
-<p>There is a slight maintenance burden here because you'll have to remember to change both the <code>sortable_class</code> and <code>sortable_url</code> tags if you want to adjust the sort column.</p>
+<p>There is a slight maintenance burden here because you&#8217;ll have to remember to change both the <code>sortable_class</code> and <code>sortable_url</code> tags if you want to update the sort column.</p>
+      
+
+      <!-- README SECTION END -->
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/drewyeaton">drewyeaton</a>. Artwork by Drew Yeaton.</p>
