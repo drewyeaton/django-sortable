@@ -188,6 +188,17 @@ Notice that we have a tuple for the fields argument, and one of the items in the
 Defining ordering fields has the secondary benefit of locking down which fields are sorted on.
 
 
+####Specifying a Default Sort Direction
+
+The default sort direction for all fields is ascending. This is probably fine for textual data, but for numbers it's nice to default to largest first. To specify a default sort direction of descending, place a `-` before the sort column in the sortable header tag. Here's an example:
+	
+	{% sortable_header -page_count "Number of Pages" %}
+	
+This tag generates a table header (with a default direction of descending) like this:
+
+	<th class="sort-none"><a href="/books/?sort=page_count&dir=desc" title="Number of Pages">Number of Pages</a></th>
+
+
 ####Sorting on Multiple Database Columns
 
 If you need more control with exactly how sorting happens, you can specify more than one column to sort by. This works with either Query Sets, lists/tuples of dictionaries or lists/tuples of objects.

@@ -23,7 +23,10 @@ def parse_tag_token(token):
   try:
     title = bits[2]
   except IndexError:
-    title = bits[1].capitalize()
+    if bits[1].startswith(('+', '-')):
+      title = bits[1][1:].capitalize()
+    else:
+      title = bits[1].capitalize()
   
   return (bits[1].strip(), title.strip())
   
@@ -32,7 +35,16 @@ class SortableLinkNode(template.Node):
   """Build sortable link based on query params."""
   
   def __init__(self, field_name, title):
-    self.field_name = field_name
+    if field_name.startswith('-'):
+      self.field_name = field_name[1:]
+      self.default_direction = 'desc'
+    elif field_name.startswith('+'):
+      self.field_name = field_name[1:]
+      self.default_direction = 'asc'
+    else:
+      self.field_name = field_name
+      self.default_direction = 'asc'
+    
     self.title = title
   
   
@@ -56,7 +68,7 @@ class SortableLinkNode(template.Node):
     if self.field_name == field_name:
       get_params['dir'] = directions[direction]['inverse']
     else:
-      get_params['dir'] = 'asc'
+      get_params['dir'] = self.default_direction
     
     if self.field_name == field_name:
       css_class = directions[direction]['class']
