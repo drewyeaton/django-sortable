@@ -70,25 +70,26 @@ class Sortable(object):
     return result
   
   
-  def sql_column(self, field_name, direction='asc', default=None):
-    """Returns a column for use in a SQL ORDER BY clause."""
+  def sql_predicate(self, field_name, direction='asc', default=None):
+    """Returns a predicate for use in a SQL ORDER BY clause."""
     
     if self.fields:
       try:
-        field = self.fields[field_name]
+        fields = self.fields[field_name]
       except KeyError:
-        return default
+        fields = default
     else:
-      field = field_name
+      fields = field_name
     
     if direction not in ('asc', 'desc'):
-      return default
+      fields = default
     
-    return '%s %s' % (field, direction.upper())
+    fields = Sortable.prepare_fields(fields, direction, sql_predicate=True)
+    return ', '.join(fields)
 
 
   @staticmethod
-  def prepare_fields(fields, direction):
+  def prepare_fields(fields, direction, sql_predicate=False):
     """Given a list or tuple of fields and direction, return a list of fields 
     with their appropriate order_by direction applied.
 
@@ -99,6 +100,8 @@ class Sortable(object):
     ['one', '-two', '-three', '-four', 'five']
     >>> Sortable.prepare_fields(fields, 'not_asc_or_desc')
     ['one', '-two', 'three', 'four', '-five']
+    >>> Sortable.prepare_fields(fields, 'desc', True)
+    ['one ASC', 'two DESC', 'three DESC', 'four DESC', 'five ASC']
     """
     
     if direction not in ('asc', 'desc'):
@@ -115,4 +118,15 @@ class Sortable(object):
       else:
         field = field[1:] if field.startswith('+') else field
         fields[i] = (direction == 'desc' and '-' or '') + field
+        
+    if not sql_predicate:
+      return fields
+    
+    # determine sql predicates from list
+    fields = list(fields)
+    for i, field in enumerate(fields):
+      if field.startswith('-'):
+        fields[i] = '%s DESC' % (field[1:],)
+      else:
+        fields[i] = '%s ASC' % (field,)
     return fields

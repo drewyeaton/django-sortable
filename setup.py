@@ -16,10 +16,10 @@ CLASSIFIERS = [
                 'Topic :: Software Development :: Libraries :: Python Modules' 
               ]
 
-KEYWORDS = 'sorting sortable queryset pagination django'
+KEYWORDS = 'sorting sortable queryset sql pagination django'
 
 setup(name='django-sortable',
-    version='0.2.1',
+    version='0.3.0',
     description='Flexible sorting for Django applications',
     long_description=LONG_DESCRIPTION,
     author='Drew Yeaton',
