@@ -76,7 +76,7 @@ class SortableLinkNode(template.Node):
       css_class = SORT_NONE_CLASS
     
     params = "&%s" % (get_params.urlencode(),) if len(get_params.keys()) > 0 else ''
-    url = '%s?sort=%s%s' % (context['request'].path, self.field_name, params)
+    url = ('%s?sort=%s%s' % (context['request'].path, self.field_name, params)).replace('&', '&amp;')
     
     return (url, css_class)
     
